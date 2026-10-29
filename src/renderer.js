@@ -15,6 +15,88 @@ const modalidadInputs = [...document.querySelectorAll('input[name="modalidad"]')
 const planDocente = $('planDocente');
 const academicos = $('academicos');
 
+
+
+// Persistencia local de los campos del formulario en este dispositivo/navegador.
+// Los archivos adjuntos no se guardan; deben volver a seleccionarse al reabrir.
+const DRAFT_STORAGE_KEY = 'gsp-permiso-pwa-draft-v0.7.1';
+let restoringDraft = false;
+function getDraftControls() {
+  return [...form.querySelectorAll('input, select, textarea')].filter(el =>
+    el.type !== 'file' && el.type !== 'password' && el.name !== 'modalidad'
+  );
+}
+function saveDraft() {
+  if (restoringDraft) return;
+  try {
+    const values = {};
+    for (const el of getDraftControls()) {
+      if (!el.id) continue;
+      values[el.id] = el instanceof HTMLSelectElement && el.multiple
+        ? [...el.selectedOptions].map(option => option.value)
+        : el.value;
+    }
+    values.__modalidad = modalidad();
+    localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify({version: 1, savedAt: new Date().toISOString(), values}));
+    const status = $('draftStatus');
+    if (status) status.textContent = 'Borrador guardado automáticamente en este dispositivo.';
+  } catch (error) {
+    const status = $('draftStatus');
+    if (status) status.textContent = 'No se pudo guardar el borrador en este navegador.';
+  }
+}
+function restoreDraft() {
+  let draft;
+  try { draft = JSON.parse(localStorage.getItem(DRAFT_STORAGE_KEY) || 'null'); }
+  catch (_) { return; }
+  if (!draft || draft.version !== 1 || !draft.values) return;
+  restoringDraft = true;
+  try {
+    const values = draft.values;
+    // Restaurar primero campos base para reconstruir los desplegables dependientes.
+    for (const el of getDraftControls()) {
+      if (!el.id || ['cargo', 'sede', 'situacion'].includes(el.id) || el.id === 'fechaSolicitud') continue;
+      if (el instanceof HTMLSelectElement && el.multiple) {
+        const selected = new Set(Array.isArray(values[el.id]) ? values[el.id] : []);
+        [...el.options].forEach(option => { option.selected = selected.has(option.value); });
+      } else if (Object.prototype.hasOwnProperty.call(values, el.id)) {
+        el.value = values[el.id];
+      }
+    }
+    if (values.__modalidad) {
+      const radio = form.querySelector(`input[name="modalidad"][value="${CSS.escape(values.__modalidad)}"]`);
+      if (radio) radio.checked = true;
+    }
+    updateCargoOptions();
+    if (values.cargo) $('cargo').value = values.cargo;
+    updateProfileFields();
+    if (values.sede) {
+      const selectedSites = Array.isArray(values.sede) ? values.sede : String(values.sede).split(', ').filter(Boolean);
+      [...$('sede').options].forEach(option => { option.selected = selectedSites.includes(option.value); });
+    }
+    updateCauseSituations();
+    if (values.situacion) $('situacion').value = values.situacion;
+    updateDescriptionRequirement();
+    updateMode();
+    updateAcademicFields();
+    forceUppercaseName();
+    forceUppercaseRector();
+    // La fecha de solicitud siempre corresponde al día actual, no a la fecha del borrador.
+    lockRequestDateToToday();
+    const status = $('draftStatus');
+    if (status) status.textContent = 'Se recuperaron los últimos datos guardados. Los soportes deben adjuntarse nuevamente.';
+  } finally {
+    restoringDraft = false;
+  }
+}
+function clearDraft() {
+  try { localStorage.removeItem(DRAFT_STORAGE_KEY); } catch (_) {}
+  const status = $('draftStatus');
+  if (status) status.textContent = 'Borrador eliminado de este dispositivo.';
+}
+form.addEventListener('input', saveDraft);
+form.addEventListener('change', saveDraft);
+
 function forceUppercaseName() {
   const input = $('nombre');
   const start = input.selectionStart;
@@ -355,6 +437,7 @@ $('clear').addEventListener('click', async () => {
   $('compensatorioAviso').classList.add('hidden');
   $('figuraEspecialAviso').classList.add('hidden');
   updateCauseSituations();
+  clearDraft();
 });
 
 $('fechaSolicitud').addEventListener('change', () => {
@@ -377,3 +460,4 @@ updateCargoOptions();
 updateCauseSituations();
 updateMode();
 updateProfileFields();
+restoreDraft();

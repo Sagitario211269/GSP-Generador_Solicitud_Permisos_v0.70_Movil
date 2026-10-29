@@ -1,0 +1,21 @@
+ACTUALIZACIÓN PWA 0.7.1 — GUARDADO AUTOMÁTICO DEL BORRADOR
+
+Archivos que deben reemplazarse en el repositorio GitHub existente:
+- index.html (raíz)
+- service-worker.js (raíz)
+- package.json (raíz, solo para mantener la versión del proyecto)
+- src/renderer.js
+- src/index.html (copia de referencia del proyecto; no es la página raíz publicada)
+
+No elimine otros archivos ni cambie las carpetas assets/ y src/.
+
+Cambios:
+- Guarda automáticamente los campos del formulario en localStorage del navegador.
+- Recupera el borrador al volver a abrir la PWA.
+- El botón Limpiar elimina el borrador local.
+- La fecha de solicitud se restablece al día actual.
+- Los soportes adjuntos NO se almacenan y deben adjuntarse de nuevo al reabrir.
+- La persistencia es local a ese navegador/dispositivo; no sincroniza con otros equipos.
+
+Pruebas realizadas en el paquete: sintaxis JavaScript, auditoría PWA y auditoría estática superadas.
+No se ha realizado una prueba visual/end-to-end en un teléfono real.
