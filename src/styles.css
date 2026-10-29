@@ -1,0 +1,26 @@
+:root{font-family:Segoe UI,Arial,sans-serif;color:#17212b;background:#f3f6fa;font-synthesis:none;text-rendering:optimizeLegibility}*{box-sizing:border-box}body{margin:0;padding:28px 18px}.app{max-width:1000px;margin:0 auto}.header{background:#fff;border:1px solid #dce3eb;border-radius:16px;padding:22px 26px;margin-bottom:20px;box-shadow:0 5px 18px rgba(23,42,65,.06)}.brand{display:flex;flex-direction:column;align-items:stretch;gap:10px}.brand img.institutional-header{display:block;width:100%;height:auto;object-fit:contain;flex:0 0 auto}.header-title{text-align:center}.header h1{font-size:22px;margin:4px 0 5px;color:#152b43}.header p{margin:0;color:#5f6f80;font-size:14px}form{display:grid;gap:16px}section{background:#fff;border:1px solid #dce3eb;border-radius:14px;padding:22px 24px;box-shadow:0 4px 14px rgba(23,42,65,.035)}h2{font-size:17px;margin:0 0 17px;color:#213e5d}.grid{display:grid;gap:15px}.grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}.grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}.recipient-row>label{min-width:0}.recipient-row select,.recipient-row input{min-width:0}label{display:flex;flex-direction:column;gap:7px;font-size:13px;font-weight:650;color:#34475a}input,select,textarea{width:100%;min-width:0;border:1px solid #cbd5e1;border-radius:8px;padding:10px 11px;font:inherit;font-weight:400;color:#17212b;background:#fff;outline:none}input:focus,select:focus,textarea:focus{border-color:#3976b8;box-shadow:0 0 0 3px rgba(57,118,184,.12)}input:disabled,select:disabled{background:#f0f2f5;color:#778392}.mode-switch{display:flex;gap:10px;margin-bottom:17px}.mode-option{display:flex;flex-direction:row;align-items:center;gap:8px;padding:10px 13px;border:1px solid #d5deea;border-radius:8px;background:#f7f9fc}.mode-option input{width:auto;margin:0}.conditional{margin-top:15px}.hidden{display:none!important}.time-row{margin-top:14px}.duration{margin-top:16px;padding:11px 13px;background:#eef4fa;border-radius:8px;color:#23476a;font-weight:700;font-size:13px}.optional{font-size:12px;font-weight:400;color:#68798a}.support{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:10px}button{border:0;border-radius:8px;padding:11px 16px;background:#234f7d;color:white;font-weight:750;font-size:12px;letter-spacing:.02em;cursor:pointer}button:hover{background:#183d63}button:disabled{opacity:.6;cursor:wait}button.secondary{background:#e9eef4;color:#34475a}button.secondary:hover{background:#dce4ed}#supportInfo{font-size:13px;color:#526477;overflow-wrap:anywhere}small{display:block;color:#66788b;line-height:1.5}.message{min-height:0;padding:0 2px;font-size:13px;overflow-wrap:anywhere}.message:not(:empty){padding:12px 14px;border-radius:8px;background:#eef2f6}.message.ok{color:#17613b;background:#e9f7ef}.message.error{color:#9c2727;background:#fff0f0}.actions{display:flex;justify-content:flex-end;gap:10px;padding-bottom:18px}textarea{resize:vertical;line-height:1.5}@media(max-width:850px){.grid.three{grid-template-columns:1fr}}@media(max-width:650px){body{padding:14px 10px}.header,section{padding:18px 16px}.brand{align-items:stretch}.brand img.institutional-header{width:100%;height:auto}.header h1{font-size:20px}.grid.two{grid-template-columns:1fr}.actions{flex-direction:column}.actions button{width:100%}}
+
+.app-credit{margin:8px 4px 0;text-align:center;color:#6b7786;font-family:Georgia,"Times New Roman",serif;font-size:10px;font-style:italic;letter-spacing:.035em}.app-credit strong{font-weight:600;color:#344d6b}
+
+.notice{margin-top:12px;padding:12px 14px;border-left:4px solid #b7791f;background:#fff7e6;color:#704d12;border-radius:6px;font-size:13px;line-height:1.5}.helper{color:#617184;font-size:13px;line-height:1.5;margin:-5px 0 15px}section>label{margin-bottom:14px}section>label:last-child{margin-bottom:0}
+
+/* Ajustes PWA para pantallas táctiles */
+@media (max-width: 650px) {
+  body { padding: 8px 7px calc(18px + env(safe-area-inset-bottom)); }
+  .app { width: 100%; }
+  .header, section { border-radius: 11px; padding: 15px 12px; }
+  .header { margin-bottom: 12px; }
+  .header h1 { font-size: 19px; line-height: 1.25; }
+  .header p { font-size: 12px; }
+  h2 { font-size: 16px; margin-bottom: 14px; }
+  label { font-size: 14px; gap: 8px; }
+  input, select, textarea { font-size: 16px; min-height: 44px; padding: 11px 10px; }
+  textarea { min-height: 92px; }
+  select[multiple] { min-height: 180px; }
+  button { min-height: 46px; font-size: 13px; width: 100%; }
+  .support { align-items: stretch; flex-direction: column; }
+  .actions { position: sticky; bottom: 0; z-index: 5; padding: 10px 0 calc(8px + env(safe-area-inset-bottom)); background: rgba(243,246,250,.97); }
+  .mode-switch { flex-direction: column; }
+  .mode-option { min-height: 44px; }
+  .message { font-size: 14px; }
+}

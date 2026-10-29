@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SOLICITUD PERMISO</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<main class="app">
+  <header class="header">
+    <div class="brand">
+      <img class="institutional-header" src="../assets/encabezado-institucional.png" alt="Encabezado institucional original con logo" onerror="this.style.display='none'">
+      <div class="header-title">
+        <h1>SOLICITUD DE PERMISO</h1>
+        <p>Generador institucional de solicitud y soporte en un único PDF.</p>
+      </div>
+    </div>
+  </header>
+
+  <form id="form">
+    <section>
+      <h2>Datos del solicitante</h2>
+      <div class="grid two">
+        <label>Nombre completo del solicitante *<input id="nombre" maxlength="100" autocomplete="name" required></label>
+        <label>Número de documento *<input id="documento" maxlength="30" inputmode="text" required></label>
+        <label>Tipo de personal *
+          <select id="tipoPersonal" required>
+            <option value="">Seleccione...</option>
+            <option>DOCENTE</option>
+            <option>DIRECTIVO DOCENTE</option>
+            <option>ADMINISTRATIVO</option>
+            
+          </select>
+        </label>
+        <label>Cargo *
+          <select id="cargo" required disabled>
+            <option value="">Seleccione primero el tipo de personal...</option>
+          </select>
+        </label>
+        <label>Jornada *
+          <select id="jornada" required><option value="">Seleccione...</option><option>MAÑANA</option><option>TARDE</option><option>MIXTA</option><option>COMPLETA</option><option>NOCHE</option><option>SABATINA</option></select>
+        </label>
+        <label id="sedeLabel">Sede * <small id="sedeHelp">Seleccione una sede.</small>
+          <select id="sede" required>
+            <option value="">Seleccione...</option>
+            <option>MANANTIAL</option><option>TOPACIO</option><option>NUEVA COLOMBIA</option><option>JORDÁN</option><option>SAN ANTONIO DE PADUA</option><option>ADMINISTRATIVA/PRINCIPAL</option>
+          </select>
+          <div id="sedesSeleccionadas" class="helper" aria-live="polite"></div>
+        </label>
+      </div>
+      <h3>Destinatario institucional</h3>
+      <div class="grid three recipient-row">
+        <label>Tratamiento del rector(a) *
+          <select id="tratamientoRector" required>
+            <option value="">Seleccione...</option><option>Señor</option><option>Señora</option><option>Licenciado</option><option>Licenciada</option><option>Especialista</option><option>Magíster</option><option>Doctor</option><option>Doctora</option>
+          </select>
+        </label>
+        <label>Nombre del rector(a) *<input id="rector" maxlength="100" autocomplete="name" required></label>
+        <label>Cargo de Rectoría *
+          <select id="cargoRectoria" required><option value="">Seleccione...</option><option value="RECTOR">Rector</option><option value="RECTORA">Rectora</option></select>
+        </label>
+      </div>
+    </section>
+
+    <section>
+      <h2>Datos del permiso</h2>
+      <div class="mode-switch" role="radiogroup" aria-label="Modalidad del permiso">
+        <label class="mode-option"><input type="radio" name="modalidad" value="POR DÍAS" checked> POR DÍAS</label>
+        <label class="mode-option"><input type="radio" name="modalidad" value="POR HORAS"> POR HORAS</label>
+      </div>
+
+      <div id="academicos" class="grid two conditional hidden">
+        <label>Nivel de enseñanza
+          <select id="nivel"><option value="">Seleccione...</option><option>PRIMARIA</option><option>SECUNDARIA</option><option>MEDIA</option><option>OTRO</option></select>
+        </label>
+        <label id="gradoWrap">Grado *
+          <select id="grado"><option value="">Seleccione grado...</option><option value="0°">0°</option><option value="1°">1°</option><option value="2°">2°</option><option value="3°">3°</option><option value="4°">4°</option><option value="5°">5°</option></select>
+        </label>
+        <label id="grupoWrap">Grupo *
+          <input id="grupo" maxlength="20" placeholder="Digite el grupo, ej. 302">
+        </label>
+        <label id="areaWrap" class="hidden">Área obligatoria o asignatura
+          <select id="area"><option value="">Seleccione el área...</option><option>CIENCIAS NATURALES Y EDUCACIÓN AMBIENTAL</option><option>CIENCIAS SOCIALES, HISTORIA, GEOGRAFÍA, CONSTITUCIÓN POLÍTICA Y DEMOCRACIA</option><option>EDUCACIÓN ARTÍSTICA Y CULTURAL</option><option>EDUCACIÓN ÉTICA Y EN VALORES HUMANOS</option><option>EDUCACIÓN FÍSICA, RECREACIÓN Y DEPORTES</option><option>EDUCACIÓN RELIGIOSA</option><option>HUMANIDADES, LENGUA CASTELLANA E IDIOMAS EXTRANJEROS</option><option>MATEMÁTICAS</option><option>TECNOLOGÍA E INFORMÁTICA</option><option>FILOSOFÍA</option><option>CIENCIAS ECONÓMICAS Y POLÍTICAS</option><option>QUÍMICA</option><option>FÍSICA</option><option>BIOLOGÍA</option><option>OTRA ASIGNATURA DEL PLAN DE ESTUDIOS</option></select>
+        </label>
+      </div>
+      <div class="grid two">
+        <label>Causa del permiso *
+          <select id="causa" required>
+            <option value="">Seleccione...</option><option>Asuntos médicos</option><option>Calamidad familiar</option><option>Asuntos judiciales</option><option>Diligencias ante autoridades públicas</option><option>Compensatorio</option><option>Permiso sindical</option><option>Otra causa justificada</option>
+          </select>
+        </label>
+        <div id="otraCausaAviso" class="notice hidden" role="alert">Ha seleccionado «Otra causa justificada». Termine de diligenciar los campos que correspondan, genere e imprima el formulario y diríjase personalmente a Rectoría para recibir orientación sobre el trámite aplicable.</div>
+        <label id="situacionWrap">Situación específica *
+          <select id="situacion" required disabled><option value="">Seleccione primero la causa...</option></select>
+        </label>
+        <label>Fecha de solicitud *<input id="fechaSolicitud" type="date" required></label>
+      </div>
+
+      <div id="diasFields" class="grid two conditional">
+        <label>Fecha de inicio *<input id="fechaInicio" type="date"></label>
+        <label>Fecha de finalización *<input id="fechaFin" type="date"></label>
+      </div>
+
+      <div id="horasFields" class="conditional hidden">
+        <label>Fecha del permiso *<input id="fechaHoras" type="date"></label>
+        <div class="grid two time-row">
+          <label>Hora de inicio *<input id="horaInicio" type="time"></label>
+          <label>Hora de finalización *<input id="horaFin" type="time"></label>
+        </div>
+      </div>
+
+      <div class="duration" id="duration">Duración: —</div>
+      <div id="duracionAviso" class="notice hidden" role="alert"></div>
+      <div id="rectorAviso" class="notice hidden" role="alert">Por su condición de rector(a), esta solicitud debe dirigirse al superior jerárquico competente. No puede aprobarse a sí mismo(a). Verifique quién tiene la competencia para decidir.</div>
+      <label id="destinatarioWrap" class="hidden">Autoridad destinataria de la solicitud del rector(a) *
+        <input id="destinatario" maxlength="140" placeholder="Nombre y cargo de la autoridad jerárquica competente">
+      </label>
+    </section>
+
+    <section>
+      <h2>Justificación y observaciones</h2>
+      <label id="justificacionWrap" class="conditional"><span id="justificacionLabel">Descripción de los hechos / justificación</span>
+        <textarea id="justificacion" rows="3" maxlength="1200" placeholder="Describa de forma concreta la causa de la solicitud."></textarea>
+      </label>
+      <div id="compensatorioAviso" class="notice hidden" role="alert">El compensatorio puede estar sujeto a reglas específicas. Verifique su procedencia y trámite antes de presentarlo como permiso ordinario.</div>
+      <div id="figuraEspecialAviso" class="notice hidden" role="alert">Las incapacidades, licencias, vacaciones, comisiones y permisos especiales pueden requerir un trámite diferente. Verifique la figura administrativa aplicable.</div>
+      <label id="observacionesWrap">Observaciones adicionales<textarea id="observaciones" rows="3" maxlength="500" placeholder="Información adicional, si aplica."></textarea></label>
+    </section>
+
+    <section id="planDocente" class="hidden">
+      <h2>Plan propuesto de atención a estudiantes</h2>
+      <p class="helper">Este apartado aplica a docentes. La propuesta se somete a revisión de Coordinación; las medidas institucionales corresponden a las autoridades competentes.</p>
+      <label>Modalidad de atención *
+        <select id="modalidadAtencion" multiple size="6" aria-describedby="modalidadAtencionHelp"><option>Guías o talleres pedagógicos</option><option>Actividades de profundización y refuerzo</option><option>Actividades autónomas orientadas</option><option>Reorganización institucional de la atención</option><option>Actividades previamente programadas</option><option>Otra estrategia pedagógica</option></select><small id="modalidadAtencionHelp" class="helper">Puede seleccionar una o varias estrategias. En Windows, mantenga Ctrl mientras hace clic en cada opción; en Mac, use ⌘ Command.</small>
+      </label>
+      <label>Actividades, grupos, recursos e instrucciones<textarea id="detallePlan" rows="4" maxlength="1800" placeholder="Indique grupos, actividades, recursos, instrucciones y cómo dejará disponibles los materiales."></textarea></label>
+      <label>Revisión / observaciones de Coordinación<textarea id="revisionCoordinacion" rows="3" maxlength="1000" placeholder="Dejar en blanco. Este espacio será diligenciado por el coordinador responsable de la revisión."></textarea><small>Este campo debe dejarse en blanco al presentar la solicitud; está reservado para Coordinación.</small></label>
+    </section>
+
+    <section>
+      <h2>Soporte <span class="optional">(opcional)</span></h2>
+      <div class="support">
+        <button type="button" id="supportBtn">ADJUNTAR SOPORTES (PDF / IMÁGENES)</button>
+        <div id="supportInfo">No se han seleccionado soportes.</div>
+        <button type="button" id="removeSupport" class="secondary hidden">Quitar todos los soportes</button>
+      </div>
+      <small>PDF, JPG, JPEG o PNG. Se pueden seleccionar varios archivos; se anexan al PDF final sin modificar los archivos originales. Máximo 25 MB por archivo.</small>
+    </section>
+
+    <div id="message" class="message" aria-live="polite"></div>
+
+    <div class="actions">
+      <button type="submit" id="generate">GENERAR SOLICITUD PDF</button>
+      <button type="button" id="clear" class="secondary">Limpiar</button>
+    </div>
+  </form>
+  <footer class="app-credit" aria-label="Crédito de desarrollo">Desarrollado por <strong>Mg. César Avila</strong></footer>
+</main>
+<script src="renderer.js"></script>
+</body>
+</html>
