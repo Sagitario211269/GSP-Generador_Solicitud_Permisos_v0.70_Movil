@@ -190,8 +190,12 @@
       section(`${sectionNo++}. DOCUMENTOS ANEXOS`);
       full('Archivos incorporados después del informe',supportFiles.map((f,i)=>`${i+1}. ${f.name}`).join(' | '));
     }
-    const teacher=data.cargo==='DOCENTE DE AULA', signH=teacher?96:72, signTop=y-2;
-    ensure((teacher?132:96)+12);
+    const teacher=data.cargo==='DOCENTE DE AULA', signH=teacher?96:72;
+    // Reserve only the real vertical footprint of the heading and signature panels.
+    // The previous 144 pt reserve for teachers moved signatures to a new page
+    // even when the visible remaining space was sufficient.
+    const signatureFootprint=(teacher?18+2+96:18+2+72)+8;
+    ensure(signatureFootprint);
     section(`${sectionNo++}. ${teacher?'FIRMAS, VISTO BUENO Y DECISIÓN INSTITUCIONAL':'FIRMAS Y DECISIÓN INSTITUCIONAL'}`);
     const gap=14, sigW=(contentW-gap)/2, left=margin, right=margin+sigW+gap, top=y-2;
     page.drawRectangle({x:left,y:top-signH,width:sigW,height:signH,borderWidth:.55,borderColor:colors.line});

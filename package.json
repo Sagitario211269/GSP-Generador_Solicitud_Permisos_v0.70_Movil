@@ -1,6 +1,6 @@
 {
   "name": "solicitud-permiso",
-  "version": "0.7.3",
+  "version": "0.7.4",
   "description": "Generador institucional de solicitudes de permiso: escritorio Windows y PWA móvil.",
   "main": "main.js",
   "author": "Institución Educativa Narciso José Matus Torres",
