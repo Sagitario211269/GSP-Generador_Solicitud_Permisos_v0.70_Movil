@@ -1,4 +1,4 @@
-const CACHE_NAME = 'generador-permisos-mobile-v0.7.0';
+const CACHE_NAME = 'generador-permisos-mobile-v0.7.3';
 const APP_ASSETS = [
   './', './index.html', './manifest.webmanifest',
   './src/styles.css', './src/renderer.js', './src/validation.js', './src/mobile-bridge.js',

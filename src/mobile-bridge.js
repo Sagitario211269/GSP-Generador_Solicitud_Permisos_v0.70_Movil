@@ -65,10 +65,23 @@
     const words = clean(text).split(/\s+/).filter(Boolean);
     if (!words.length) return ['—'];
     const lines=[]; let line='';
-    for (const word of words) {
-      const test=line ? `${line} ${word}` : word;
-      if (font.widthOfTextAtSize(test,size) <= maxWidth) line=test;
-      else { if (line) lines.push(line); line=word; }
+    const splitLongWord = word => {
+      const parts=[]; let part='';
+      for (const char of Array.from(word)) {
+        const candidate=part+char;
+        if (part && font.widthOfTextAtSize(candidate,size)>maxWidth) { parts.push(part); part=char; }
+        else part=candidate;
+      }
+      if (part) parts.push(part);
+      return parts;
+    };
+    for (const originalWord of words) {
+      const pieces=font.widthOfTextAtSize(originalWord,size)<=maxWidth ? [originalWord] : splitLongWord(originalWord);
+      for (const word of pieces) {
+        const test=line ? `${line} ${word}` : word;
+        if (font.widthOfTextAtSize(test,size)<=maxWidth) line=test;
+        else { if (line) lines.push(line); line=word; }
+      }
     }
     if (line) lines.push(line);
     return lines;
@@ -132,12 +145,22 @@
     };
     const full = (label,value) => {
       if (!clean(value)) return;
-      const lines=wrap(value,font,9,contentW-12), h=Math.max(29,20+lines.length*11);
-      ensure(h+2);
-      page.drawRectangle({x:margin,y:y-h,width:contentW,height:h,borderWidth:.45,borderColor:colors.line});
-      page.drawText(upper(label),{x:margin+6,y:y-10,size:6.6,font:bold,color:colors.label});
-      drawWrapped(value,margin+6,y-20,contentW-12,9,11);
-      y-=h+8;
+      const lines=wrap(value,font,9,contentW-12);
+      const lineH=11;
+      let offset=0, first=true;
+      while (offset<lines.length) {
+        if (y-bottom<40) addPage();
+        const capacity=Math.max(1,Math.floor((y-bottom-28)/lineH));
+        const count=Math.min(capacity,lines.length-offset);
+        const chunk=lines.slice(offset,offset+count);
+        const h=Math.max(29,20+chunk.length*lineH);
+        page.drawRectangle({x:margin,y:y-h,width:contentW,height:h,borderWidth:.45,borderColor:colors.line});
+        page.drawText(upper(first?label:`${label} (continuación)`),{x:margin+6,y:y-10,size:6.6,font:bold,color:colors.label});
+        chunk.forEach((line,i)=>page.drawText(line,{x:margin+6,y:y-20-i*lineH,size:9,font,color:colors.text}));
+        y-=h+8;
+        offset+=count; first=false;
+        if (offset<lines.length) addPage();
+      }
     };
     addPage();
     let sectionNo=1;
