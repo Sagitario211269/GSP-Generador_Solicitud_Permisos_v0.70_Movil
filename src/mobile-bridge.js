@@ -122,7 +122,7 @@
       y=startY;
     };
     const ensure = h => { if (y-h<bottom) addPage(); };
-    const section = title => { ensure(36); y-=7; page.drawText(title,{x:margin,y,size:8.5,font:bold,color:colors.heading}); y-=11; };
+    const section = title => { ensure(30); y-=5; page.drawText(title,{x:margin,y,size:8.5,font:bold,color:colors.heading}); y-=9; };
     const drawWrapped = (text,x,top,width,size=9,lineH=11,face=font,color=colors.text) => {
       const lines=wrap(text,face,size,width);
       lines.forEach((line,i)=>page.drawText(line,{x,y:top-i*lineH,size,font:face,color}));
@@ -141,7 +141,7 @@
         drawWrapped(f.value || '—',x+pad,y-20,widths[i]-pad*2,size,lineH);
         x+=widths[i]+gap;
       });
-      y-=h+8;
+      y-=h+6;
     };
     const full = (label,value) => {
       if (!clean(value)) return;
@@ -157,7 +157,7 @@
         page.drawRectangle({x:margin,y:y-h,width:contentW,height:h,borderWidth:.45,borderColor:colors.line});
         page.drawText(upper(first?label:`${label} (continuación)`),{x:margin+6,y:y-10,size:6.6,font:bold,color:colors.label});
         chunk.forEach((line,i)=>page.drawText(line,{x:margin+6,y:y-20-i*lineH,size:9,font,color:colors.text}));
-        y-=h+8;
+        y-=h+6;
         offset+=count; first=false;
         if (offset<lines.length) addPage();
       }
@@ -173,7 +173,7 @@
     const boxH=Math.max(34,12+recipient.length*11); ensure(boxH+2);
     page.drawRectangle({x:margin,y:y-boxH,width:contentW,height:boxH,borderWidth:.45,borderColor:colors.line});
     recipient.forEach((line,i)=>drawWrapped(line,margin+6,y-11-i*11,contentW-12,9,10.5));
-    y-=boxH+8;
+    y-=boxH+6;
     section(`${sectionNo++}. INFORMACIÓN DEL PERMISO`);
     row([{label:'Fecha de solicitud',value:fmtDate(data.fechaSolicitud)},{label:'Modalidad',value:data.modalidad},{label:'Duración solicitada',value:duration(data)}]);
     if(data.modalidad==='POR DÍAS') row([{label:'Fecha inicial',value:fmtDate(data.fechaInicio)},{label:'Fecha final',value:fmtDate(data.fechaFin)},{label:'Horario',value:'Jornada completa'}]);
@@ -194,7 +194,7 @@
     // Reserve only the real vertical footprint of the heading and signature panels.
     // The previous 144 pt reserve for teachers moved signatures to a new page
     // even when the visible remaining space was sufficient.
-    const signatureFootprint=18+2+signH+4;
+    const signatureFootprint=14+2+signH+4;
     ensure(signatureFootprint);
     section(`${sectionNo++}. ${teacher?'FIRMAS, VISTO BUENO Y DECISIÓN INSTITUCIONAL':'FIRMAS Y DECISIÓN INSTITUCIONAL'}`);
     const gap=14, sigW=(contentW-gap)/2, left=margin, right=margin+sigW+gap, top=y-2;
