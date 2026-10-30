@@ -23,7 +23,6 @@
     </div>
   </header>
 
-  <p id="draftStatus" class="helper" role="status">Los campos se guardan automáticamente en este dispositivo. Los soportes adjuntos deberán seleccionarse de nuevo al reabrir.</p>
   <form id="form">
     <section>
       <h2>Datos del solicitante</h2>
@@ -164,8 +163,8 @@
   <footer class="app-credit" aria-label="Crédito de desarrollo">Desarrollado por <strong>Mg. César Avila</strong></footer>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
-<script src="src/mobile-bridge.js"></script>
+<script src="src/mobile-bridge.js?v=0.7.4-cachefix1"></script>
 <script src="src/renderer.js"></script>
-<script>if ("serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("./service-worker.js").catch(console.error));</script>
+<script>if ("serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("./service-worker.js?v=0.7.4-cachefix1", {updateViaCache:"none"}).then(reg => reg.update()).catch(console.error));</script>
 </body>
 </html>
