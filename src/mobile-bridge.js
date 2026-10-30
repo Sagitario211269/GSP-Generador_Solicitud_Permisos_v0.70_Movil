@@ -109,8 +109,8 @@
       y=startY;
     };
     const ensure = h => { if (y-h<bottom) addPage(); };
-    const section = title => { ensure(34); y-=7; page.drawText(title,{x:margin,y,size:8.2,font:bold,color:colors.heading}); y-=10; };
-    const drawWrapped = (text,x,top,width,size=7.5,lineH=9,face=font,color=colors.text) => {
+    const section = title => { ensure(36); y-=7; page.drawText(title,{x:margin,y,size:8.5,font:bold,color:colors.heading}); y-=11; };
+    const drawWrapped = (text,x,top,width,size=9,lineH=11,face=font,color=colors.text) => {
       const lines=wrap(text,face,size,width);
       lines.forEach((line,i)=>page.drawText(line,{x,y:top-i*lineH,size,font:face,color}));
       return lines.length;
@@ -118,38 +118,38 @@
     const row = (fields, opts={}) => {
       const gap=opts.gap ?? 10, aw=contentW-gap*(fields.length-1);
       const widths=opts.widths ? opts.widths.map(v=>aw*v/opts.widths.reduce((a,b)=>a+b,0)) : fields.map(()=>aw/fields.length);
-      const size=opts.fontSize ?? 7.6, pad=5, lineH=opts.lineHeight ?? 9;
+      const size=opts.fontSize ?? 9, pad=5, lineH=opts.lineHeight ?? 11;
       const wrapped=fields.map((f,i)=>wrap(f.value || '—',font,size,widths[i]-pad*2));
-      const max=Math.max(...wrapped.map(a=>a.length)), h=Math.max(opts.minHeight ?? 26,18+max*lineH);
+      const max=Math.max(...wrapped.map(a=>a.length)), h=Math.max(opts.minHeight ?? 29,20+max*lineH);
       ensure(h+2); let x=margin;
       fields.forEach((f,i)=>{
         page.drawRectangle({x,y:y-h,width:widths[i],height:h,borderWidth:.45,borderColor:colors.line});
-        page.drawText(upper(f.label),{x:x+pad,y:y-9,size:6.1,font:bold,color:colors.label});
-        drawWrapped(f.value || '—',x+pad,y-18,widths[i]-pad*2,size,lineH);
+        page.drawText(upper(f.label),{x:x+pad,y:y-10,size:6.6,font:bold,color:colors.label});
+        drawWrapped(f.value || '—',x+pad,y-20,widths[i]-pad*2,size,lineH);
         x+=widths[i]+gap;
       });
       y-=h+8;
     };
     const full = (label,value) => {
       if (!clean(value)) return;
-      const lines=wrap(value,font,7.3,contentW-12), h=Math.max(25,18+lines.length*8.5);
+      const lines=wrap(value,font,9,contentW-12), h=Math.max(29,20+lines.length*11);
       ensure(h+2);
       page.drawRectangle({x:margin,y:y-h,width:contentW,height:h,borderWidth:.45,borderColor:colors.line});
-      page.drawText(upper(label),{x:margin+6,y:y-9,size:6.1,font:bold,color:colors.label});
-      drawWrapped(value,margin+6,y-18,contentW-12,7.3,8.5);
+      page.drawText(upper(label),{x:margin+6,y:y-10,size:6.6,font:bold,color:colors.label});
+      drawWrapped(value,margin+6,y-20,contentW-12,9,11);
       y-=h+8;
     };
     addPage();
     let sectionNo=1;
     section(`${sectionNo++}. IDENTIFICACIÓN DEL SOLICITANTE`);
-    row([{label:'Nombre completo',value:upper(data.nombre)},{label:'Documento',value:data.documento},{label:'Tipo de personal',value:data.tipoPersonal}],{widths:[5.2,1.6,2.2],fontSize:7.5});
+    row([{label:'Nombre completo',value:upper(data.nombre)},{label:'Documento',value:data.documento},{label:'Tipo de personal',value:data.tipoPersonal}],{widths:[5.2,1.6,2.2],fontSize:9,lineHeight:11});
     row([{label:'Cargo',value:data.cargo},{label:'Sede(s)',value:data.sede},{label:'Jornada',value:data.jornada}]);
     if (data.nivel || data.gradoGrupo || data.area) row([{label:'Nivel',value:data.nivel},{label:'Grado y grupo',value:data.gradoGrupo},{label:'Área',value:data.area}]);
     section(`${sectionNo++}. DESTINATARIO INSTITUCIONAL`);
     const recipient=[data.cargo==='RECTOR'?'Autoridad jerárquica competente':data.tratamientoRector,data.cargo==='RECTOR'?data.destinatario:upper(data.rector),data.cargo==='RECTOR'?'Superior jerárquico':(data.cargoRectoria==='RECTORA'?'Rectora':'Rector')].filter(Boolean);
-    const boxH=Math.max(31,10+recipient.length*9); ensure(boxH+2);
+    const boxH=Math.max(34,12+recipient.length*11); ensure(boxH+2);
     page.drawRectangle({x:margin,y:y-boxH,width:contentW,height:boxH,borderWidth:.45,borderColor:colors.line});
-    recipient.forEach((line,i)=>drawWrapped(line,margin+6,y-10-i*9,contentW-12,7.6,8.2));
+    recipient.forEach((line,i)=>drawWrapped(line,margin+6,y-11-i*11,contentW-12,9,10.5));
     y-=boxH+8;
     section(`${sectionNo++}. INFORMACIÓN DEL PERMISO`);
     row([{label:'Fecha de solicitud',value:fmtDate(data.fechaSolicitud)},{label:'Modalidad',value:data.modalidad},{label:'Duración solicitada',value:duration(data)}]);
@@ -174,8 +174,8 @@
     page.drawRectangle({x:left,y:top-signH,width:sigW,height:signH,borderWidth:.55,borderColor:colors.line});
     page.drawText('SOLICITANTE',{x:left+7,y:top-11,size:6.2,font:bold,color:colors.label});
     page.drawLine({start:{x:left+7,y:top-27},end:{x:left+sigW-7,y:top-27},thickness:.65,color:colors.label});
-    page.drawText(upper(data.nombre),{x:left+7,y:top-39,size:7.2,font:bold,color:colors.text});
-    page.drawText(`C.C. ${data.documento} · ${data.cargo}`,{x:left+7,y:top-50,size:6.4,font,color:colors.text});
+    page.drawText(upper(data.nombre),{x:left+7,y:top-39,size:8.5,font:bold,color:colors.text});
+    page.drawText(`C.C. ${data.documento} · ${data.cargo}`,{x:left+7,y:top-52,size:7,font,color:colors.text});
     if(teacher){page.drawText('Vo. Bo. de Coordinación',{x:left+7,y:top-76,size:6.2,font:bold,color:colors.label});page.drawLine({start:{x:left+7,y:top-88},end:{x:left+sigW-7,y:top-88},thickness:.65,color:colors.label});}
     page.drawRectangle({x:right,y:top-signH,width:sigW,height:signH,borderWidth:.55,borderColor:colors.line});
     page.drawText('DECISIÓN DE RECTORÍA',{x:right+7,y:top-11,size:6.2,font:bold,color:colors.label});
