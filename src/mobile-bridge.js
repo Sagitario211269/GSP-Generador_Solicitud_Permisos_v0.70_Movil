@@ -194,7 +194,7 @@
     // Reserve only the real vertical footprint of the heading and signature panels.
     // The previous 144 pt reserve for teachers moved signatures to a new page
     // even when the visible remaining space was sufficient.
-    const signatureFootprint=(teacher?18+2+96:18+2+72)+8;
+    const signatureFootprint=18+2+signH+4;
     ensure(signatureFootprint);
     section(`${sectionNo++}. ${teacher?'FIRMAS, VISTO BUENO Y DECISIÓN INSTITUCIONAL':'FIRMAS Y DECISIÓN INSTITUCIONAL'}`);
     const gap=14, sigW=(contentW-gap)/2, left=margin, right=margin+sigW+gap, top=y-2;
