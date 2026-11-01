@@ -14,6 +14,10 @@ const horasFields = $('horasFields');
 const modalidadInputs = [...document.querySelectorAll('input[name="modalidad"]')];
 const planDocente = $('planDocente');
 const academicos = $('academicos');
+const signatureBtn = $('signatureBtn');
+const signatureInfo = $('signatureInfo');
+const removeSignature = $('removeSignature');
+const dateFieldIds = ['fechaDia1','fechaDia2','fechaDia3'];
 
 
 
@@ -188,12 +192,16 @@ function updateProfileFields() {
 
 function updateAcademicFields() {
   const level = $('nivel').value;
+  const preschool = level === 'PREESCOLAR';
   const primary = level === 'PRIMARIA';
   const secondary = ['SECUNDARIA', 'MEDIA'].includes(level);
-  $('gradoWrap').classList.toggle('hidden', !primary);
-  $('grupoWrap').classList.toggle('hidden', !primary);
-  $('grado').required = tipoPersonal.value === 'DOCENTE' && primary;
-  $('grupo').required = tipoPersonal.value === 'DOCENTE' && primary;
+  $('gradoWrap').classList.toggle('hidden', !(preschool || primary));
+  $('grupoWrap').classList.toggle('hidden', !(preschool || primary));
+  $('grado').required = tipoPersonal.value === 'DOCENTE' && (preschool || primary);
+  $('grupo').required = tipoPersonal.value === 'DOCENTE' && (preschool || primary);
+  const grade=$('grado'), previous=grade.value;
+  grade.innerHTML = '<option value="">Seleccione grado...</option>' + (preschool ? '<option>PREJARDÍN</option><option>JARDÍN</option><option>TRANSICIÓN</option>' : '<option value="1°">1°</option><option value="2°">2°</option><option value="3°">3°</option><option value="4°">4°</option><option value="5°">5°</option>');
+  if ([...grade.options].some(o=>o.value===previous)) grade.value=previous;
   $('areaWrap').classList.toggle('hidden', !secondary);
   $('area').required = tipoPersonal.value === 'DOCENTE' && secondary;
 }
@@ -238,59 +246,21 @@ function updateCargoOptions() {
 }
 
 function updateMode() {
-  const byDays = modalidad() === 'POR DÍAS';
-  diasFields.classList.toggle('hidden', !byDays);
-  horasFields.classList.toggle('hidden', byDays);
-
-  $('fechaInicio').required = byDays;
-  $('fechaFin').required = byDays;
-  $('fechaHoras').required = !byDays;
-  $('horaInicio').required = !byDays;
-  $('horaFin').required = !byDays;
-  updateDuration();
+  const byDays=modalidad()==='POR DÍAS'; diasFields.classList.toggle('hidden',!byDays); horasFields.classList.toggle('hidden',byDays);
+  dateFieldIds.forEach((id,i)=>{$(id).required=byDays&&i===0;}); $('fechaHoras').required=!byDays; $('horaInicio').required=!byDays; $('horaFin').required=!byDays; updateDuration();
 }
+function getSelectedBusinessDates(){return dateFieldIds.map(id=>$(id).value).filter(Boolean);}
+function formatDateForUi(v){const [y,m,d]=v.split('-');return `${d}/${m}/${y}`;}
+function isWeekendDate(v){const d=new Date(`${v}T00:00:00Z`).getUTCDay();return d===0||d===6;}
+function easterSunday(y){const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),month=Math.floor((h+l-7*m+114)/31),day=((h+l-7*m+114)%31)+1;return new Date(Date.UTC(y,month-1,day));}
+function isoDate(d){return d.toISOString().slice(0,10);}
+function mondayOnOrAfter(d){const x=new Date(d),day=x.getUTCDay();if(day!==1)x.setUTCDate(x.getUTCDate()+((8-day)%7));return x;}
+function isColombianHoliday(v){const y=Number(v.slice(0,4)),fixed=[[1,1,false],[1,6,true],[3,19,true],[5,1,false],[6,29,true],[7,20,false],[8,7,false],[8,15,true],[10,12,true],[11,1,true],[11,11,true],[12,8,false],[12,25,false]],h=new Set();fixed.forEach(([m,d,move])=>{const x=new Date(Date.UTC(y,m-1,d));h.add(isoDate(move?mondayOnOrAfter(x):x));});const e=easterSunday(y);[-3,-2].forEach(n=>{const x=new Date(e);x.setUTCDate(x.getUTCDate()+n);h.add(isoDate(x));});[39,60,68].forEach(n=>{const x=new Date(e);x.setUTCDate(x.getUTCDate()+n);h.add(isoDate(mondayOnOrAfter(x)));});return h.has(v);}
+function isColombianBusinessDay(v){return !isWeekendDate(v)&&!isColombianHoliday(v);}
+function updateDuration(){const notice=$('duracionAviso');notice.classList.add('hidden');notice.textContent='';if(modalidad()==='POR DÍAS'){const dates=getSelectedBusinessDates(),unique=[...new Set(dates)].sort(),invalid=unique.filter(d=>!isColombianBusinessDay(d));$('fechasSeleccionadas').textContent=unique.length?`Fechas seleccionadas: ${unique.map(formatDateForUi).join(' · ')}`:'';$('duration').textContent=unique.length?`Duración: ${unique.length} de 3 días hábiles`:'Duración: —';if(dates.length!==unique.length||invalid.length||unique.length>3){notice.textContent=dates.length!==unique.length?'No repita una misma fecha.':invalid.length?`${invalid.map(formatDateForUi).join(', ')}: fecha no hábil. No se admiten fines de semana ni festivos nacionales.`:'La solicitud supera el máximo permitido de tres días hábiles.';notice.classList.remove('hidden');}return;}const a=$('horaInicio').value,b=$('horaFin').value;if(!a||!b){$('duration').textContent='Duración: —';return;}const [h1,m1]=a.split(':').map(Number),[h2,m2]=b.split(':').map(Number),mins=h2*60+m2-h1*60-m1;$('duration').textContent=mins>0?`Duración: ${Math.floor(mins/60)} h ${mins%60} min`:'Duración: revise las horas';}
 
-function updateDuration() {
-  const legalNotice = $('duracionAviso');
-  legalNotice.classList.add('hidden');
-  legalNotice.textContent = '';
-  if (modalidad() === 'POR DÍAS') {
-    const start = $('fechaInicio').value;
-    const end = $('fechaFin').value;
-    if (!start || !end) {
-      $('duration').textContent = 'Duración: —';
-      return;
-    }
-    const s = new Date(`${start}T00:00:00`);
-    const e = new Date(`${end}T00:00:00`);
-    const days = Math.floor((e - s) / 86400000) + 1;
-    $('duration').textContent = days > 0 ? `Duración calendario: ${days} día(s)` : 'Duración: revise las fechas';
-    if (days > 0 && ['DOCENTE', 'DIRECTIVO DOCENTE'].includes(tipoPersonal.value)) {
-      let businessDays = 0;
-      for (let d = new Date(`${start}T12:00:00`); d <= e; d.setDate(d.getDate() + 1)) {
-        if (d.getDay() !== 0 && d.getDay() !== 6) businessDays++;
-      }
-      if (businessDays > 3) {
-        legalNotice.textContent = `Atención: el rango incluye ${businessDays} días de lunes a viernes. Para docentes y directivos docentes sujetos al artículo 57 del Decreto Ley 1278 de 2002, revise el límite de tres días hábiles consecutivos al mes y el régimen aplicable. El cálculo no descuenta festivos y no constituye decisión jurídica automática.`;
-        legalNotice.classList.remove('hidden');
-      }
-    }
-    return;
-  }
-
-  const h1 = $('horaInicio').value;
-  const h2 = $('horaFin').value;
-  if (!h1 || !h2) {
-    $('duration').textContent = 'Duración: —';
-    return;
-  }
-  const [a, b] = h1.split(':').map(Number);
-  const [c, d] = h2.split(':').map(Number);
-  const mins = (c * 60 + d) - (a * 60 + b);
-  $('duration').textContent = mins > 0
-    ? `Duración: ${Math.floor(mins / 60)} h ${mins % 60} min`
-    : 'Duración: revise las horas';
-}
+signatureBtn.addEventListener('click', async () => { try { const result=await window.solicitudPermiso.seleccionarFirma(); if(!result)return; signatureInfo.textContent=`Firma seleccionada: ${result.name}`; removeSignature.classList.remove('hidden'); setMessage('Firma digital importada y recortada automáticamente.', 'ok'); } catch(e){setMessage(e.message||'No fue posible importar la firma.','error');} });
+removeSignature.addEventListener('click',()=>{window.solicitudPermiso.quitarFirma();signatureInfo.textContent='No se ha importado una firma.';removeSignature.classList.add('hidden');setMessage('');});
 
 $('nombre').addEventListener('input', forceUppercaseName);
 $('rector').addEventListener('input', forceUppercaseRector);
@@ -338,7 +308,7 @@ $('modalidadAtencion').addEventListener('change', () => {
   $('detallePlan').required = selected.includes('Otra estrategia pedagógica');
 });
 modalidadInputs.forEach(input => input.addEventListener('change', updateMode));
-['fechaInicio', 'fechaFin', 'fechaHoras', 'horaInicio', 'horaFin'].forEach(id => $(id).addEventListener('input', updateDuration));
+[...dateFieldIds,'fechaHoras','horaInicio','horaFin'].forEach(id=>$(id).addEventListener('input',updateDuration));
 
 supportBtn.addEventListener('click', async () => {
   try {
@@ -380,8 +350,9 @@ form.addEventListener('submit', async (event) => {
     modalidad: modalidad(),
     causa: causa.value,
     fechaSolicitud: $('fechaSolicitud').value,
-    fechaInicio: byDays ? $('fechaInicio').value : $('fechaHoras').value,
-    fechaFin: byDays ? $('fechaFin').value : $('fechaHoras').value,
+    fechasPermiso: byDays ? getSelectedBusinessDates() : [$('fechaHoras').value],
+    fechaInicio: byDays ? getSelectedBusinessDates().sort()[0] || '' : $('fechaHoras').value,
+    fechaFin: byDays ? getSelectedBusinessDates().sort().slice(-1)[0] || '' : $('fechaHoras').value,
     horaInicio: byDays ? '' : $('horaInicio').value,
     horaFin: byDays ? '' : $('horaFin').value,
     jornada: $('jornada').value,
@@ -403,10 +374,10 @@ form.addEventListener('submit', async (event) => {
       if (!data.modalidadAtencion) throw new Error('Seleccione la modalidad del plan de atención a estudiantes.');
       if (!data.detallePlan) throw new Error('Describa las actividades, grupos, recursos e instrucciones del plan de atención.');
       if (data.modalidadAtencion.split('; ').includes('Otra estrategia pedagógica') && !data.detallePlan) throw new Error('Describa la otra estrategia pedagógica.');
-      if (data.nivel === 'PRIMARIA' && (!data.grado || !data.grupo)) throw new Error('Seleccione el grado de 0° a 5° y digite el grupo a cargo.');
+      if (['PREESCOLAR','PRIMARIA'].includes(data.nivel) && (!data.grado || !data.grupo)) throw new Error('Seleccione el grado correspondiente y digite el grupo a cargo.');
       if (['SECUNDARIA', 'MEDIA'].includes(data.nivel) && !data.area) throw new Error('Indique el área o asignatura a cargo.');
     }
-    if (data.modalidad === 'POR DÍAS' && data.fechaFin < data.fechaInicio) throw new Error('La fecha de finalización no puede ser anterior a la fecha de inicio.');
+    if(data.modalidad==='POR DÍAS'){const dates=data.fechasPermiso;if(!dates.length)throw new Error('Seleccione al menos un día de permiso.');if(dates.length>3)throw new Error('No puede solicitar más de tres días hábiles, sean consecutivos o no.');if(new Set(dates).size!==dates.length)throw new Error('No repita una misma fecha en la solicitud.');for(const d of dates){if(d<today())throw new Error('No se puede solicitar un permiso para una fecha que ya pasó.');if(!isColombianBusinessDay(d))throw new Error(`${formatDateForUi(d)} no es un día hábil.`);}}else{if(data.fechaInicio<today())throw new Error('No se puede solicitar un permiso para una fecha que ya pasó.');if(!isColombianBusinessDay(data.fechaInicio))throw new Error('No se pueden solicitar permisos por horas en fines de semana ni festivos nacionales.');}
     if (data.cargo === 'RECTOR' && !data.destinatario) throw new Error('Indique la autoridad jerárquica competente a quien se dirige la solicitud de Rectoría.');
     if (data.modalidad === 'POR HORAS' && data.horaFin <= data.horaInicio) throw new Error('La hora de finalización debe ser posterior a la hora de inicio.');
     const result = await window.solicitudPermiso.generarPdf(data);
@@ -425,6 +396,7 @@ $('clear').addEventListener('click', async () => {
   forceUppercaseName();
   forceUppercaseRector();
   lockRequestDateToToday();
+  window.solicitudPermiso.quitarFirma(); signatureInfo.textContent='No se ha importado una firma.'; removeSignature.classList.add('hidden');
   $('destinatario').value = '';
   supportInfo.textContent = 'No se han seleccionado soportes.';
   removeSupport.classList.add('hidden');
@@ -433,7 +405,7 @@ $('clear').addEventListener('click', async () => {
   updateMode();
   updateProfileFields();
   $('otraCausaAviso').classList.add('hidden');
-  $('grado').value = ''; $('grupo').value = '';
+  $('grado').value = ''; $('grupo').value = ''; dateFieldIds.forEach(id=>$(id).value='');
   $('compensatorioAviso').classList.add('hidden');
   $('figuraEspecialAviso').classList.add('hidden');
   updateCauseSituations();
@@ -452,8 +424,9 @@ $('fechaSolicitud').addEventListener('change', () => {
   $('fechaSolicitud').max = currentDay;
 });
 $('fechaSolicitud').addEventListener('focus', lockRequestDateToToday);
-
-lockRequestDateToToday();
+$('fechaSolicitud').addEventListener('change',()=>{lockRequestDateToToday();window.alert('La fecha de solicitud corresponde únicamente al día en que se diligencia el formulario.');});
+[...dateFieldIds,'fechaHoras'].forEach(id=>{ $(id).addEventListener('change',()=>{const field=$(id),v=field.value;if(v&&v<today()){field.value='';updateDuration();window.alert('No se puede solicitar un permiso para una fecha que ya pasó. Seleccione la fecha actual o una posterior.');return;}if(v&&!isColombianBusinessDay(v)){field.value='';updateDuration();window.alert(`La fecha ${formatDateForUi(v)} no está habilitada porque corresponde a ${isWeekendDate(v)?'sábado o domingo':'festivo nacional'}. Seleccione un día hábil.`);return;}updateDuration();});});
+lockRequestDateToToday(); [...dateFieldIds,'fechaHoras'].forEach(id=>$(id).min=today());
 forceUppercaseName();
 forceUppercaseRector();
 updateCargoOptions();

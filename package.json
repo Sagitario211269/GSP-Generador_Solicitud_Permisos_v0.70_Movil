@@ -1,7 +1,7 @@
 {
   "name": "solicitud-permiso",
-  "version": "0.7.4",
-  "description": "Generador institucional de solicitudes de permiso: escritorio Windows y PWA móvil.",
+  "version": "0.8.4",
+  "description": "Generador institucional de solicitudes de permiso con validación de días hábiles y firma digital en PWA móvil.",
   "main": "main.js",
   "author": "Institución Educativa Narciso José Matus Torres",
   "license": "MIT",
@@ -9,7 +9,7 @@
     "start": "electron .",
     "dev": "electron .",
     "build": "electron-builder --win",
-    "test": "node scripts/audit.js && node --test scripts/validation.test.js scripts/support-validation.test.js",
+    "test": "npm run test:mobile && node --test scripts/validation.test.js scripts/support-validation.test.js",
     "build:win": "electron-builder --win nsis portable",
     "test:mobile": "node scripts/audit-mobile.js"
   },

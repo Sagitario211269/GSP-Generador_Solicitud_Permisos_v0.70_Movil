@@ -77,10 +77,10 @@
 
       <div id="academicos" class="grid two conditional hidden">
         <label>Nivel de enseñanza
-          <select id="nivel"><option value="">Seleccione...</option><option>PRIMARIA</option><option>SECUNDARIA</option><option>MEDIA</option><option>OTRO</option></select>
+          <select id="nivel"><option value="">Seleccione...</option><option>PREESCOLAR</option><option>PRIMARIA</option><option>SECUNDARIA</option><option>MEDIA</option></select>
         </label>
         <label id="gradoWrap">Grado *
-          <select id="grado"><option value="">Seleccione grado...</option><option value="0°">0°</option><option value="1°">1°</option><option value="2°">2°</option><option value="3°">3°</option><option value="4°">4°</option><option value="5°">5°</option></select>
+          <select id="grado"><option value="">Seleccione grado...</option><option>PREJARDÍN</option><option>JARDÍN</option><option>TRANSICIÓN</option><option value="1°">1°</option><option value="2°">2°</option><option value="3°">3°</option><option value="4°">4°</option><option value="5°">5°</option></select>
         </label>
         <label id="grupoWrap">Grupo *
           <input id="grupo" maxlength="20" placeholder="Digite el grupo, ej. 302">
@@ -102,9 +102,13 @@
         <label>Fecha de solicitud *<input id="fechaSolicitud" type="date" required></label>
       </div>
 
-      <div id="diasFields" class="grid two conditional">
-        <label>Fecha de inicio *<input id="fechaInicio" type="date"></label>
-        <label>Fecha de finalización *<input id="fechaFin" type="date"></label>
+      <div id="diasFields" class="conditional">
+        <p class="helper">Seleccione hasta tres fechas hábiles. Pueden ser consecutivas o no; no se admiten sábados, domingos ni festivos nacionales de Colombia.</p>
+        <div class="grid two">
+          <label>Primer día solicitado *<input id="fechaDia1" type="date"></label>
+          <label>Segundo día solicitado<input id="fechaDia2" type="date"></label>
+          <label>Tercer día solicitado<input id="fechaDia3" type="date"></label>
+        </div><div id="fechasSeleccionadas" class="helper" aria-live="polite"></div>
       </div>
 
       <div id="horasFields" class="conditional hidden">
@@ -146,6 +150,12 @@
     <section>
       <h2>Soporte <span class="optional">(opcional)</span></h2>
       <div class="support">
+        <button type="button" id="signatureBtn" class="secondary">IMPORTAR FIRMA DIGITAL DEL SOLICITANTE</button>
+        <span id="signatureInfo">No se ha importado una firma.</span>
+        <button type="button" id="removeSignature" class="secondary hidden">Quitar firma</button>
+      </div>
+      <small>La firma se recorta automáticamente para eliminar márgenes blancos o transparentes y se ajusta proporcionalmente al espacio del solicitante. Formatos: PNG o JPG.</small>
+      <div class="support">
         <button type="button" id="supportBtn">ADJUNTAR SOPORTES (PDF / IMÁGENES)</button>
         <div id="supportInfo">No se han seleccionado soportes.</div>
         <button type="button" id="removeSupport" class="secondary hidden">Quitar todos los soportes</button>
@@ -163,8 +173,8 @@
   <footer class="app-credit" aria-label="Crédito de desarrollo">Desarrollado por <strong>Mg. César Avila</strong></footer>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
-<script src="src/mobile-bridge.js?v=0.7.4-cachefix1"></script>
-<script src="src/renderer.js"></script>
-<script>if ("serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("./service-worker.js?v=0.7.4-cachefix1", {updateViaCache:"none"}).then(reg => reg.update()).catch(console.error));</script>
+<script src="src/mobile-bridge.js?v=0.8.4-mobile"></script>
+<script src="src/renderer.js?v=0.8.4-mobile"></script>
+<script>if ("serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("./service-worker.js?v=0.8.4-mobile", {updateViaCache:"none"}).then(reg => reg.update()).catch(console.error));</script>
 </body>
 </html>

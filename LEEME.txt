@@ -1,21 +1,17 @@
-ACTUALIZACIÓN PWA 0.7.1 — GUARDADO AUTOMÁTICO DEL BORRADOR
+GSP v0.8.4 — OPTIMIZACIÓN DE PAGINACIÓN Y FIRMAS
 
-Archivos que deben reemplazarse en el repositorio GitHub existente:
-- index.html (raíz)
-- service-worker.js (raíz)
-- package.json (raíz, solo para mantener la versión del proyecto)
-- src/renderer.js
-- src/index.html (copia de referencia del proyecto; no es la página raíz publicada)
+Reemplazar únicamente estos tres archivos en el repositorio de GitHub Pages:
 
-No elimine otros archivos ni cambie las carpetas assets/ y src/.
+1. src/mobile-bridge.js
+2. service-worker.js
+3. package.json
 
 Cambios:
-- Guarda automáticamente los campos del formulario en localStorage del navegador.
-- Recupera el borrador al volver a abrir la PWA.
-- El botón Limpiar elimina el borrador local.
-- La fecha de solicitud se restablece al día actual.
-- Los soportes adjuntos NO se almacenan y deben adjuntarse de nuevo al reabrir.
-- La persistencia es local a ese navegador/dispositivo; no sincroniza con otros equipos.
+- Conserva el ajuste automático de textos extensos incorporado en v0.7.3.
+- Calcula el espacio requerido por el encabezado de firmas y los recuadros según el tamaño real de estos elementos.
+- Evita enviar las firmas a una página nueva cuando aún caben debajo del contenido.
+- Si no existe espacio suficiente, inicia la sección de firmas en una página nueva, sin superponer contenido.
+- Mantiene encabezado, pie institucional, tipografía y diseño.
+- No modifica datos, campos ni la selección Rectora/Rector.
 
-Pruebas realizadas en el paquete: sintaxis JavaScript, auditoría PWA y auditoría estática superadas.
-No se ha realizado una prueba visual/end-to-end en un teléfono real.
+Después del commit, cierre completamente la PWA y vuelva a abrirla con conexión a internet para actualizar la caché.

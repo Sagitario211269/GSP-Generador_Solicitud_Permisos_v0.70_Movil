@@ -5,6 +5,10 @@
   const MAX_FILES = 20;
   const MAX_PDF_PAGES = 100;
   const supportFiles = [];
+  let signatureDataUrl = null;
+  let signatureName = "";
+  const signaturePicker = document.createElement("input");
+  signaturePicker.type = "file"; signaturePicker.accept = "image/png,image/jpeg,.png,.jpg,.jpeg"; signaturePicker.hidden = true; document.body.appendChild(signaturePicker);
   const picker = document.createElement('input');
   picker.type = 'file';
   picker.accept = '.pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png';
@@ -33,10 +37,36 @@
       const h = Math.floor(mins/60), m = mins%60;
       return h && m ? `${h} h ${m} min` : h ? `${h} ${h===1?'hora':'horas'}` : `${m} min`;
     }
-    const days = Math.floor((new Date(`${d.fechaFin}T00:00:00`) - new Date(`${d.fechaInicio}T00:00:00`))/86400000)+1;
-    return `${days} ${days===1?'día':'días'}`;
+    const days = Array.isArray(d.fechasPermiso) ? d.fechasPermiso.length : 0;
+    return `${days} ${days===1?'día':'días'} hábiles`;
   };
   const safeFilename = d => `SOLICITUD_PERMISO_${clean(d.documento).replace(/[^a-z0-9_-]/gi,'_')}_${d.fechaInicio}_${upper(d.nombre).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Z0-9_-]+/g,'_') || 'SOLICITANTE'}.pdf`;
+
+
+  async function chooseSignature() {
+    return new Promise(resolve => {
+      signaturePicker.value = '';
+      signaturePicker.onchange = async () => {
+        const file = signaturePicker.files && signaturePicker.files[0];
+        if (!file) { resolve(null); return; }
+        try {
+          if (!['image/png','image/jpeg'].includes(file.type) || file.size > 5 * 1024 * 1024) throw new Error('Seleccione una firma PNG o JPG de máximo 5 MB.');
+          const url = await new Promise((res,rej) => { const reader=new FileReader(); reader.onload=()=>res(reader.result); reader.onerror=()=>rej(new Error('No se pudo leer la imagen de firma.')); reader.readAsDataURL(file); });
+          const image = await new Promise((res,rej)=>{const img=new Image();img.onload=()=>res(img);img.onerror=()=>rej(new Error('La imagen de firma no es válida.'));img.src=url;});
+          if (!image.width || !image.height || image.width > 10000 || image.height > 10000 || image.width*image.height > 40000000) throw new Error('Las dimensiones de la firma no son válidas.');
+          const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d',{willReadFrequently:true}); canvas.width=image.width;canvas.height=image.height;ctx.drawImage(image,0,0);
+          const pixels=ctx.getImageData(0,0,canvas.width,canvas.height),d=pixels.data;let minX=canvas.width,minY=canvas.height,maxX=-1,maxY=-1;
+          for(let y=0;y<canvas.height;y+=1)for(let x=0;x<canvas.width;x+=1){const i=(y*canvas.width+x)*4,a=d[i+3],bright=d[i]>245&&d[i+1]>245&&d[i+2]>245;if(a>12&&!bright){if(x<minX)minX=x;if(x>maxX)maxX=x;if(y<minY)minY=y;if(y>maxY)maxY=y;}}
+          if(maxX<minX||maxY<minY)throw new Error('La imagen no contiene trazos visibles de firma.');
+          const pad=Math.max(2,Math.round(Math.max(maxX-minX+1,maxY-minY+1)*0.025));minX=Math.max(0,minX-pad);minY=Math.max(0,minY-pad);maxX=Math.min(canvas.width-1,maxX+pad);maxY=Math.min(canvas.height-1,maxY+pad);
+          const out=document.createElement('canvas');out.width=maxX-minX+1;out.height=maxY-minY+1;out.getContext('2d').drawImage(canvas,minX,minY,out.width,out.height,0,0,out.width,out.height);
+          signatureDataUrl=out.toDataURL('image/png');signatureName=file.name;resolve({name:file.name});
+        } catch(e){alert(e.message);resolve(null);}
+      };
+      signaturePicker.click();
+    });
+  }
+  function clearSignature(){signatureDataUrl=null;signatureName='';return true;}
 
   async function pickSupport() {
     return new Promise(resolve => {
@@ -78,8 +108,14 @@
     if (!window.PDFLib) throw new Error('No se pudo cargar el motor PDF. Conéctese a internet, recargue la aplicación y vuelva a intentar.');
     if (!document.getElementById('form').reportValidity()) throw new Error('Revise los campos obligatorios del formulario.');
     if (!data.nombre || !data.documento || !data.tipoPersonal || !data.cargo) throw new Error('Complete la identificación del solicitante.');
-    if (!data.fechaSolicitud || !data.fechaInicio || !data.fechaFin) throw new Error('Complete las fechas obligatorias.');
-    if (data.modalidad === 'POR DÍAS' && data.fechaFin < data.fechaInicio) throw new Error('La fecha final no puede ser anterior a la fecha inicial.');
+    if (!data.fechaSolicitud || !data.fechaInicio) throw new Error('Complete las fechas obligatorias.');
+    const currentDay=(()=>{const n=new Date();return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;})();
+    if(data.fechaSolicitud!==currentDay)throw new Error('La fecha de solicitud debe corresponder únicamente al día de hoy.');
+    const isWeekend=v=>[0,6].includes(new Date(`${v}T00:00:00Z`).getUTCDay());
+    const easter=y=>{const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),mo=Math.floor((h+l-7*m+114)/31),day=((h+l-7*m+114)%31)+1;return new Date(Date.UTC(y,mo-1,day));};
+    const isHoliday=v=>{const y=+v.slice(0,4),fixed=[[1,1,false],[1,6,true],[3,19,true],[5,1,false],[6,29,true],[7,20,false],[8,7,false],[8,15,true],[10,12,true],[11,1,true],[11,11,true],[12,8,false],[12,25,false]],set=new Set(),iso=d=>d.toISOString().slice(0,10),monday=d=>{const x=new Date(d),w=x.getUTCDay();if(w!==1)x.setUTCDate(x.getUTCDate()+((8-w)%7));return x;};fixed.forEach(([m,d,move])=>{const x=new Date(Date.UTC(y,m-1,d));set.add(iso(move?monday(x):x));});const e=easter(y);[-3,-2].forEach(n=>{const x=new Date(e);x.setUTCDate(x.getUTCDate()+n);set.add(iso(x));});[39,60,68].forEach(n=>{const x=new Date(e);x.setUTCDate(x.getUTCDate()+n);set.add(iso(monday(x)));});return set.has(v);};
+    const business=v=>!isWeekend(v)&&!isHoliday(v);
+    if(data.modalidad==='POR DÍAS'){const dates=Array.isArray(data.fechasPermiso)?data.fechasPermiso:[];if(!dates.length)throw new Error('Seleccione al menos un día de permiso.');if(dates.length>3)throw new Error('No puede solicitar más de tres días hábiles, sean consecutivos o no.');if(new Set(dates).size!==dates.length)throw new Error('No repita una misma fecha.');for(const v of dates){if(v<currentDay)throw new Error('No se puede solicitar un permiso para una fecha que ya pasó.');if(!business(v))throw new Error(`${fmtDate(v)} corresponde a un fin de semana o festivo nacional.`);}}else{if(data.fechaInicio<currentDay)throw new Error('No se puede solicitar un permiso para una fecha que ya pasó.');if(!business(data.fechaInicio))throw new Error('No se pueden solicitar permisos por horas en fines de semana ni festivos nacionales.');}
     if (data.modalidad === 'POR HORAS' && (!data.horaInicio || !data.horaFin || data.horaFin <= data.horaInicio)) throw new Error('La hora final debe ser posterior a la hora inicial.');
     if (data.cargo === 'RECTOR' && !data.destinatario) throw new Error('Indique la autoridad jerárquica competente.');
     const { PDFDocument, StandardFonts, rgb } = window.PDFLib;
@@ -153,7 +189,7 @@
     y-=boxH+8;
     section(`${sectionNo++}. INFORMACIÓN DEL PERMISO`);
     row([{label:'Fecha de solicitud',value:fmtDate(data.fechaSolicitud)},{label:'Modalidad',value:data.modalidad},{label:'Duración solicitada',value:duration(data)}]);
-    if(data.modalidad==='POR DÍAS') row([{label:'Fecha inicial',value:fmtDate(data.fechaInicio)},{label:'Fecha final',value:fmtDate(data.fechaFin)},{label:'Horario',value:'Jornada completa'}]);
+    if(data.modalidad==='POR DÍAS') row([{label:'Fechas solicitadas',value:(data.fechasPermiso||[]).sort().map(fmtDate).join(' · ')},{label:'Cantidad',value:duration(data)},{label:'Horario',value:'Jornada completa'}]);
     else row([{label:'Fecha del permiso',value:fmtDate(data.fechaInicio)},{label:'Hora de inicio',value:fmtTime(data.horaInicio)},{label:'Hora de finalización',value:fmtTime(data.horaFin)}]);
     row([{label:'Causa del permiso',value:data.causa},{label:'Situación específica',value:data.situacion || 'No aplica'}]);
     full('Justificación',data.justificacion || (data.causa==='Otra causa justificada'?'La persona solicitante tratará esta situación personalmente con Rectoría.':''));
@@ -173,10 +209,11 @@
     const gap=14, sigW=(contentW-gap)/2, left=margin, right=margin+sigW+gap, top=y-2;
     page.drawRectangle({x:left,y:top-signH,width:sigW,height:signH,borderWidth:.55,borderColor:colors.line});
     page.drawText('SOLICITANTE',{x:left+7,y:top-11,size:6.2,font:bold,color:colors.label});
-    page.drawLine({start:{x:left+7,y:top-27},end:{x:left+sigW-7,y:top-27},thickness:.65,color:colors.label});
-    page.drawText(upper(data.nombre),{x:left+7,y:top-39,size:7.2,font:bold,color:colors.text});
-    page.drawText(`C.C. ${data.documento} · ${data.cargo}`,{x:left+7,y:top-50,size:6.4,font,color:colors.text});
-    if(teacher){page.drawText('Vo. Bo. de Coordinación',{x:left+7,y:top-76,size:6.2,font:bold,color:colors.label});page.drawLine({start:{x:left+7,y:top-88},end:{x:left+sigW-7,y:top-88},thickness:.65,color:colors.label});}
+    
+    if(signatureDataUrl){const raw=Uint8Array.from(atob(signatureDataUrl.split(',')[1]),c=>c.charCodeAt(0));const sig=await pdf.embedPng(raw);const maxW=Math.min(72,sigW-28),maxH=32,scale=Math.min(maxW/sig.width,maxH/sig.height),w=sig.width*scale,h=sig.height*scale;page.drawImage(sig,{x:left+(sigW-w)/2-20,y:top-33-h/2,width:w,height:h});}
+    page.drawText(upper(data.nombre),{x:left+7,y:top-53,size:7.2,font:bold,color:colors.text});
+    page.drawText(`C.C. ${data.documento} · ${data.cargo}`,{x:left+7,y:top-64,size:6.4,font,color:colors.text});
+    if(teacher){page.drawText('Vo. Bo. de Coordinación',{x:left+7,y:top-79,size:6.2,font:bold,color:colors.label});page.drawLine({start:{x:left+7,y:top-91},end:{x:left+sigW-7,y:top-91},thickness:.65,color:colors.label});}
     page.drawRectangle({x:right,y:top-signH,width:sigW,height:signH,borderWidth:.55,borderColor:colors.line});
     page.drawText('DECISIÓN DE RECTORÍA',{x:right+7,y:top-11,size:6.2,font:bold,color:colors.label});
     page.drawRectangle({x:right+7,y:top-27,width:7,height:7,borderWidth:.65,borderColor:colors.label});
@@ -222,6 +259,8 @@
   window.solicitudPermiso = Object.freeze({
     seleccionarSoporte: pickSupport,
     quitarSoporte: async () => { supportFiles.splice(0); picker.value=''; return true; },
+    seleccionarFirma: chooseSignature,
+    quitarFirma: clearSignature,
     generarPdf: createPdf
   });
 })();
