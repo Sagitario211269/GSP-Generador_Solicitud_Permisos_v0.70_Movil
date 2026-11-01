@@ -1,55 +1,12 @@
 {
-  "name": "solicitud-permiso",
-  "version": "0.8.4",
-  "description": "Generador institucional de solicitudes de permiso con validación de días hábiles y firma digital en PWA móvil.",
-  "main": "main.js",
+  "name": "gsp-solicitudes-permiso-pwa",
+  "version": "0.8.5",
+  "private": true,
+  "description": "Generador institucional de solicitudes de permiso. Aplicación web progresiva (PWA) para móviles y navegadores.",
   "author": "Institución Educativa Narciso José Matus Torres",
-  "license": "MIT",
+  "license": "UNLICENSED",
   "scripts": {
-    "start": "electron .",
-    "dev": "electron .",
-    "build": "electron-builder --win",
-    "test": "npm run test:mobile && node --test scripts/validation.test.js scripts/support-validation.test.js",
-    "build:win": "electron-builder --win nsis portable",
+    "test": "npm run test:mobile && node --test scripts/validation.test.js",
     "test:mobile": "node scripts/audit-mobile.js"
-  },
-  "dependencies": {
-    "pdf-lib": "^1.17.1"
-  },
-  "devDependencies": {
-    "electron": "^41.10.6",
-    "electron-builder": "^26.15.3"
-  },
-  "build": {
-    "appId": "co.edu.narcisojosematus.solicitudpermiso",
-    "productName": "Solicitud Permiso",
-    "asar": true,
-    "files": [
-      "main.js",
-      "preload.js",
-      "src/**/*",
-      "assets/**/*",
-      "package.json"
-    ],
-    "win": {
-      "target": [
-        "nsis",
-        "portable"
-      ],
-      "artifactName": "${productName} ${version}.${ext}",
-      "icon": "assets/icono-generador.ico"
-    },
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true,
-      "installerIcon": "assets/icono-generador.ico",
-      "uninstallerIcon": "assets/icono-generador.ico",
-      "artifactName": "${productName} Instalador ${version}.${ext}"
-    },
-    "portable": {
-      "artifactName": "${productName} Portable ${version}.${ext}"
-    }
   }
 }

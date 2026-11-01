@@ -1,8 +1,8 @@
-const CACHE_NAME = 'generador-permisos-mobile-v0.8.4';
+const CACHE_NAME = 'generador-permisos-mobile-v0.8.5';
 const APP_ASSETS = [
   './', './index.html', './manifest.webmanifest',
   './src/styles.css', './src/renderer.js', './src/validation.js',
-  './src/mobile-bridge.js?v=0.8.4-mobile',
+  './src/mobile-bridge.js?v=0.8.5-mobile',
   './assets/encabezado-institucional.png', './assets/pie-institucional.png',
   './assets/icono-192.png', './assets/icono-512.png', './assets/icono-generador.png'
 ];

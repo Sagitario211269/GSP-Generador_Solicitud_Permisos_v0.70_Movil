@@ -1,17 +1,18 @@
-GSP v0.8.4 — OPTIMIZACIÓN DE PAGINACIÓN Y FIRMAS
+GSP MÓVIL v0.8.5 — PROYECTO PWA DEPURADO
 
-Reemplazar únicamente estos tres archivos en el repositorio de GitHub Pages:
+Esta distribución es exclusivamente para GitHub Pages.
 
-1. src/mobile-bridge.js
-2. service-worker.js
-3. package.json
+PUBLICACIÓN
+1. Descomprima el archivo ZIP.
+2. Suba TODO el contenido de la carpeta del proyecto a la raíz del repositorio GitHub Pages, reemplazando los archivos anteriores.
+3. Confirme los cambios (Commit changes).
+4. Espere la publicación y abra la aplicación mediante HTTPS.
+5. Cierre completamente la PWA anterior y vuelva a abrirla con internet para actualizar la caché v0.8.5.
 
-Cambios:
-- Conserva el ajuste automático de textos extensos incorporado en v0.7.3.
-- Calcula el espacio requerido por el encabezado de firmas y los recuadros según el tamaño real de estos elementos.
-- Evita enviar las firmas a una página nueva cuando aún caben debajo del contenido.
-- Si no existe espacio suficiente, inicia la sección de firmas en una página nueva, sin superponer contenido.
-- Mantiene encabezado, pie institucional, tipografía y diseño.
-- No modifica datos, campos ni la selección Rectora/Rector.
+DEPURACIÓN
+- Se retiraron Electron, electron-builder y las tareas de compilación Windows.
+- Se retiraron main.js, preload.js y COMPILAR_WINDOWS.bat.
+- Se retiraron auditorías y módulos exclusivos de escritorio.
+- package.json queda únicamente para ejecutar auditoría y pruebas con Node.js; no hay dependencias de producción ni de Electron.
 
-Después del commit, cierre completamente la PWA y vuelva a abrirla con conexión a internet para actualizar la caché.
+La versión PC conserva su proyecto independiente. No mezcle archivos del proyecto PC con este repositorio móvil.
